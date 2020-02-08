@@ -28,6 +28,7 @@ assert(db ~= nil)
 
 -- create a table
 local users_table_sql = [[
+  PRAGMA foreign_keys = ON;
   CREATE TABLE IF NOT EXISTS users (
     uuid TEXT PRIMARY KEY,
     login TEXT,
@@ -170,7 +171,7 @@ end
 
 local r, err = stmt:finalize()
 
-local stmt, err = db:prepare("SELECT uuid FROM users")
+local stmt, err = db:prepare("SELECT uuid, login FROM users")
 assert(stmt ~= nil)
 
 local row = stmt:rows()
@@ -186,6 +187,16 @@ if row then
 end
 
 local r, err = stmt:finalize()
+
+local stmt, err = db:prepare("PRAGMA foreign_keys")
+if not stmt then
+  p(err)
+end
+assert(stmt ~= nil)
+local row = stmt:rows()
+if row then
+  p(row())
+end
 
 local r, err = db:close()
 if r ~= sqlite.OK then
